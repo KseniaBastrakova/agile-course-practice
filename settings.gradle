@@ -116,8 +116,12 @@ project(":code/number-system-converter/Infrastructure").name = "number-system-co
 
 
 // Pichugin Gregory
-include "code/accounting-finances"
-project(":code/accounting-finances").name = "accounting-finances"
+include "code/accounting-finances/Model"
+project(":code/accounting-finances/Model").name = "accounting-finances-Model"
+include "code/accounting-finances/View"
+project(":code/accounting-finances/View").name = "accounting-finances-View"
+include "code/accounting-finances/ViewModel"
+project(":code/accounting-finances/ViewModel").name = "accounting-finances-ViewModel"
 
 
 
