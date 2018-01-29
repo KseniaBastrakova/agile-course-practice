@@ -2,25 +2,19 @@ package ru.unn.agile.FinanceCalculator.viewmodel;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import ru.unn.agile.FinanceCalculator.Model.*;
+import ru.unn.agile.FinanceCalculator.Model.Expenses;
 
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import ru.unn.agile.FinanceCalculator.Model.ExpensesType;
+import ru.unn.agile.FinanceCalculator.Model.Money;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
 public class ViewModel {
-    public BooleanProperty setButtonDisabledProperty() {
-        return setButtonDisabled;
-    }
-
-    public final boolean isSetButtonDisabled() {
-        return setButtonDisabled.get();
-    }
-
-
     public ViewModel() {
         inputExpenses = new HashMap<>();
         for (ExpensesType type : ExpensesType.values()) {
@@ -28,8 +22,8 @@ public class ViewModel {
         }
 
         inputExpensesCost.set("");
-        statusGetting.set(Status.WAITING.toString());
         statusSetting.set(Status.WAITING.toString());
+        statusGetting.set(Status.WAITING.toString());
         expenses = new Expenses();
         dateInput.set(LocalDate.now());
         dateOutput.set(LocalDate.now());
@@ -43,21 +37,52 @@ public class ViewModel {
             }
         };
 
+        BooleanBinding couldGetValue = new BooleanBinding() {
+            {
+                super.bind(dateOutput);
+            }
+            @Override
+            protected boolean computeValue() {
+                return getOutputStatus() == Status.READY;
+            }
+        };
+
         setButtonDisabled.bind(couldAddValue.not());
+        getButtonDisabled.bind(couldGetValue.not());
 
 
-        final ValueChangeListenerDateSet listenerInputDate = new ValueChangeListenerDateSet();
+        final ValueChangeListenerDataSet listenerInputDate = new ValueChangeListenerDataSet();
         dateInput.addListener(listenerInputDate);
         valueChangedListenerDataSet.add(listenerInputDate);
 
-        final ValueChangeListenerDateGet listnerOutputDate = new ValueChangeListenerDateGet();
-        dateOutput.addListener(listnerOutputDate);
-        valueChangedListenerDataGet.add(listnerOutputDate);
 
-        final ValueChangeListenerDoubleSet listenerInputCost = new ValueChangeListenerDoubleSet();
-        costInput.addListener(listenerInputCost);
+        final ValueChangeListenerInputCostSet listenerInputCost
+                = new ValueChangeListenerInputCostSet();
+        inputExpensesCost.addListener(listenerInputCost);
         valueChangedListenerDouble.add(listenerInputCost);
+
+        final ValueChangeListenerDateOutputSet listenerOutputDate
+                = new ValueChangeListenerDateOutputSet();
+        dateOutput.addListener(listenerOutputDate);
+        valueChangedListenerDataOutputSet.add(listenerOutputDate);
     }
+
+    public BooleanProperty setButtonDisabledProperty() {
+        return setButtonDisabled;
+    }
+
+    public final boolean isSetButtonDisabled() {
+        return setButtonDisabled.get();
+    }
+
+    public BooleanProperty getButtonDisabledProperty() {
+        return getButtonDisabled;
+    }
+
+    public final boolean isGetButtonDisabled() {
+        return getButtonDisabled.get();
+    }
+
 
     public StringProperty eatingOutProperty() {
         return inputExpenses.get(ExpensesType.EatingOut);
@@ -148,6 +173,7 @@ public class ViewModel {
     public StringProperty statusGettingProperty() {
         return statusGetting;
     }
+
     public final String getStatusGetting() {
         return statusGetting.get();
     }
@@ -174,30 +200,40 @@ public class ViewModel {
 
     private Status getInputStatus() {
         Status inputStatus = Status.READY;
-        if ((dateInput == null || inputExpensesCostProperty().get().isEmpty())) {
+        if ((dateInput == null || inputExpensesCostProperty().get().isEmpty())
+                || expensesTypes.get() == null) {
             inputStatus = Status.WAITING;
         }
-
+        try {
+            if (!inputExpensesCostProperty().get().isEmpty()) {
+               double res = Double.parseDouble(inputExpensesCostProperty().get());
+               if (res < 0) {
+                   inputStatus = Status.BAD_FORMAT;
+               }
+            }
+        } catch (NumberFormatException nfe) {
+            inputStatus = Status.BAD_FORMAT;
+        }
+        if (dateInput != null && dateInput.get().isAfter(LocalDate.now())) {
+                inputStatus = Status.BAD_FORMAT_DATA;
+            }
         return inputStatus;
     }
 
-    private Status getGettingStatus() {
-        Status inputStatus = Status.READY;
+    private Status getOutputStatus() {
+        Status outputStatus = Status.READY;
         if (dateOutput == null) {
-            inputStatus = Status.WAITING;
+            outputStatus = Status.WAITING;
         }
-        return inputStatus;
+        if (dateOutput != null && dateOutput.get().isAfter(LocalDate.now())) {
+                outputStatus = Status.BAD_FORMAT_DATA;
+        }
+        return outputStatus;
     }
 
-    private class ValueChangeListenerDateGet implements ChangeListener<LocalDate> {
-        @Override
-        public void changed(final ObservableValue<? extends LocalDate> observable,
-                            final LocalDate oldValue, final LocalDate newValue) {
-            statusGetting.set(getGettingStatus().toString());
-        }
-    }
 
-    private class ValueChangeListenerDateSet implements ChangeListener<LocalDate> {
+
+    private class ValueChangeListenerDataSet implements ChangeListener<LocalDate> {
         @Override
         public void changed(final ObservableValue<? extends LocalDate> observable,
                             final LocalDate oldValue, final LocalDate newValue) {
@@ -205,11 +241,19 @@ public class ViewModel {
         }
     }
 
-    private class ValueChangeListenerDoubleSet implements ChangeListener<Double> {
+    private class ValueChangeListenerInputCostSet implements ChangeListener<String> {
         @Override
-        public void changed(final ObservableValue<? extends Double> observable,
-                            final Double oldValue, final Double newValue) {
+        public void changed(final ObservableValue<? extends String> observable,
+                            final String oldValue, final String newValue) {
             statusSetting.set(getInputStatus().toString());
+        }
+    }
+
+    private class ValueChangeListenerDateOutputSet implements ChangeListener<LocalDate> {
+        @Override
+        public void changed(final ObservableValue<? extends LocalDate> observable,
+                            final LocalDate oldValue, final LocalDate newValue) {
+            statusGetting.set(getOutputStatus().toString());
         }
     }
 
@@ -217,11 +261,12 @@ public class ViewModel {
     private final ObjectProperty<ObservableList<ExpensesType>> expensesType =
             new SimpleObjectProperty<>(FXCollections.observableArrayList(ExpensesType.values()));
     private final ObjectProperty<ExpensesType> expensesTypes = new SimpleObjectProperty<>();
-    private final List<ValueChangeListenerDateSet> valueChangedListenerDataSet = new ArrayList<>();
-    private final List<ValueChangeListenerDateGet> valueChangedListenerDataGet = new ArrayList<>();
-    private final List<ValueChangeListenerDoubleSet> valueChangedListenerDouble = new ArrayList<>();
+    private final List<ValueChangeListenerDataSet> valueChangedListenerDataSet = new ArrayList<>();
+    private final List<ValueChangeListenerDateOutputSet>
+            valueChangedListenerDataOutputSet = new ArrayList<>();
+    private final List<ValueChangeListenerInputCostSet>
+            valueChangedListenerDouble = new ArrayList<>();
     private final ObjectProperty<LocalDate> dateInput = new SimpleObjectProperty<>();
-    private final ObjectProperty<Double> costInput = new SimpleObjectProperty<>();
     private final ObjectProperty<LocalDate> dateOutput = new SimpleObjectProperty<>();
 
     public ObjectProperty<ExpensesType> expensesTypesProperty() {
@@ -229,15 +274,18 @@ public class ViewModel {
     }
 
     private final BooleanProperty setButtonDisabled = new SimpleBooleanProperty();
-    private final StringProperty statusGetting = new SimpleStringProperty();
     private final StringProperty statusSetting = new SimpleStringProperty();
+    private final BooleanProperty getButtonDisabled = new SimpleBooleanProperty();
+    private final StringProperty statusGetting = new SimpleStringProperty();
     private final StringProperty inputExpensesCost = new SimpleStringProperty();
     private Expenses expenses;
 }
 
 enum Status {
     WAITING("Please, input data"),
-    READY("Click 'add Expenses'");
+    READY("Click button"),
+    BAD_FORMAT_DATA("Date can't be after today"),
+    BAD_FORMAT("Bad format"),;
 
     Status(final String name) {
         this.name = name;

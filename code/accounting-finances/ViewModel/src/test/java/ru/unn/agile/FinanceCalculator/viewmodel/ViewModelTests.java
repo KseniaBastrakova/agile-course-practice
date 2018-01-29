@@ -65,19 +65,6 @@ public class ViewModelTests {
     }
 
     @Test
-    public void statusGettingIsWaitingWhenCalculateWithEmptyFields() {
-        viewModel.getCosts();
-        assertEquals(Status.WAITING.toString(), viewModel.statusGettingProperty().get());
-    }
-
-    @Test
-    public void statusIsReadyWhenFieldsSettingCostAreFill() {
-        LocalDate date = LocalDate.of(2009, Month.APRIL, 10);
-        viewModel.dateOutputProperty().set(date);
-        assertEquals(Status.READY.toString(), viewModel.statusGettingProperty().get());
-    }
-
-    @Test
     public void statusIsWaitingWhenFieldsSettingCostAreEmpty() {
         viewModel.submitCosts();
         assertEquals(Status.WAITING.toString(), viewModel.statusSettingProperty().get());

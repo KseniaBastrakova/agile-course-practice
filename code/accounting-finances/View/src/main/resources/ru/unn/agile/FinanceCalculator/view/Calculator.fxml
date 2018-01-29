@@ -29,14 +29,15 @@
       <Label fx:id="transport" layoutX="442.0" layoutY="204.0" prefHeight="25.0" prefWidth="64.0" text="${viewModel.transport}" />
       <Label fx:id="services" layoutX="442.0" layoutY="232.0" prefHeight="17.0" prefWidth="71.0" text="${viewModel.services}" />
       <Button fx:id="input" disable="${viewModel.setButtonDisabled}" layoutX="50.0" layoutY="332.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="174.0" text="add expenses" />
-      <Button fx:id="output" layoutX="308.0" layoutY="327.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="119.0" text="get expenses" />
+      <Button fx:id="output" disable="${viewModel.getButtonDisabled}" layoutX="308.0" layoutY="327.0" mnemonicParsing="false" prefHeight="33.0" prefWidth="119.0" text="get expenses" />
       <DatePicker fx:id="inputData" layoutX="39.0" layoutY="74.0" />
       <Label fx:id="entertaiment" layoutX="443.0" layoutY="254.0" prefHeight="17.0" prefWidth="91.0" text="${viewModel.entertainment}" />
       <Label layoutX="280.0" layoutY="39.0" prefHeight="25.0" prefWidth="174.0" text="Print costs for the date:" />
       <Label layoutX="39.0" layoutY="39.0" prefHeight="25.0" prefWidth="138.0" text="Print costs for the date:" />
       <Label layoutX="39.0" layoutY="112.0" prefHeight="17.0" prefWidth="186.0" text="Amount of expenses in rubles:" />
       <Label layoutX="42.0" layoutY="188.0" prefHeight="25.0" prefWidth="149.0" text="Select type of expenses:" />
-      <Label layoutX="36.0" layoutY="369.0" text="${viewModel.statusGetting}" />
+      <Label layoutX="36.0" layoutY="369.0" text="${viewModel.statusSetting}" />
       <Label layoutX="323.0" layoutY="369.0" />
+      <Label layoutX="303.0" layoutY="369.0" text="${viewModel.statusGetting}" />
    </children>
 </AnchorPane>
