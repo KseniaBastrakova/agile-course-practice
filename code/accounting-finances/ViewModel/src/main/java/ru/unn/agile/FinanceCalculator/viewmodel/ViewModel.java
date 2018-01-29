@@ -12,81 +12,38 @@ import java.time.ZoneId;
 import java.util.*;
 
 public class ViewModel {
-    private final Map<ExpensesType, StringProperty> inputExpenses;
-    private final ObjectProperty<ObservableList<ExpensesType>> operations =
-            new SimpleObjectProperty<>(FXCollections.observableArrayList(ExpensesType.values()));
-    private final ObjectProperty<ExpensesType> operation = new SimpleObjectProperty<>();
-    private final List<ValueChangeListenerDateSet> valueChangedListenerDataSet = new ArrayList<>();
-    private final List<ValueChangeListenerDateGet> valueChangedListenerDataGet = new ArrayList<>();
-    private final List<ValueChangeListenerDoubleSet> valueChangedListenerDouble = new ArrayList<>();
-    private final ObjectProperty<LocalDate> dateInput = new SimpleObjectProperty<>();
-    private final ObjectProperty<Double> costInput = new SimpleObjectProperty<>();
-    private final ObjectProperty<LocalDate> dateOutput = new SimpleObjectProperty<>();
+    public BooleanProperty setButtonDisabledProperty() {
+        return setButtonDisabled;
+    }
 
-    public ObjectProperty<ExpensesType> operationProperty() {
-        return operation;
+    public final boolean isSetButtonDisabled() {
+        return setButtonDisabled.get();
     }
 
 
-
-    private final BooleanProperty setDisabled = new SimpleBooleanProperty();
-    private final BooleanProperty getDisabled = new SimpleBooleanProperty();
-    private final StringProperty statusGetting = new SimpleStringProperty();
-    private final StringProperty statusSetting = new SimpleStringProperty();
-    private final StringProperty inputExpencesCost = new SimpleStringProperty();
-    private Expenses expenses;
-
-    public BooleanProperty setDisabledProperty() {
-        return setDisabled;
-    }
-
-    public final boolean isSetDisabled() {
-        return setDisabled.get();
-    }
-
-    public BooleanProperty getDisabledProperty() {
-        return getDisabled;
-    }
-
-    public final boolean isGetDisabled() {
-        return getDisabled.get();
-    }
-
-
-    // FXML needs default c-tor for binding
     public ViewModel() {
         inputExpenses = new HashMap<>();
         for (ExpensesType type : ExpensesType.values()) {
             inputExpenses.put(type, new SimpleStringProperty(""));
         }
 
-        inputExpencesCost.set("");
-        statusGetting.set(StatusGettingCost.WAITING.toString());
-        statusSetting.set(StatusInputCost.WAITING.toString());
+        inputExpensesCost.set("");
+        statusGetting.set(Status.WAITING.toString());
+        statusSetting.set(Status.WAITING.toString());
         expenses = new Expenses();
         dateInput.set(LocalDate.now());
         dateOutput.set(LocalDate.now());
         BooleanBinding couldAddValue = new BooleanBinding() {
             {
-                super.bind(inputExpencesCost, dateInput);
+                super.bind(inputExpensesCost, dateInput);
             }
             @Override
             protected boolean computeValue() {
-                return getInputCostStatus() == StatusInputCost.READY;
+                return getInputStatus() == Status.READY;
             }
         };
 
-        BooleanBinding couldGetValue = new BooleanBinding() {
-            {
-                super.bind(dateOutput);
-            }
-            @Override
-            protected boolean computeValue() {
-                return getGettingCostStatus() == StatusGettingCost.READY;
-            }
-        };
-        getDisabled.bind(couldGetValue.not());
-        setDisabled.bind(couldAddValue.not());
+        setButtonDisabled.bind(couldAddValue.not());
 
 
         final ValueChangeListenerDateSet listenerInputDate = new ValueChangeListenerDateSet();
@@ -148,7 +105,7 @@ public class ViewModel {
     public final String getEntertainment() {
         return inputExpenses.get(ExpensesType.Entertainment).get();
     }
-  //  public StringProperty inputExpencesProperty(){ return inputExpences; }
+
     public Expenses expensesProperty() {
         return expenses;
     }
@@ -157,21 +114,28 @@ public class ViewModel {
         return dateInput;
     }
 
+    public LocalDate getDateInput() {
+        return dateInput.get();
+    }
+
+    public LocalDate getDateOutput() {
+        return dateOutput.get();
+    }
+
     public ObjectProperty<LocalDate> dateOutputProperty() {
         return dateOutput;
     }
 
-    public StringProperty inputExpencesCostProperty() {
-        return inputExpencesCost;
+    public StringProperty inputExpensesCostProperty() {
+        return inputExpensesCost;
     }
 
-    public ObjectProperty<ObservableList<ExpensesType>> operationsProperty() {
-        return operations;
+    public ObjectProperty<ObservableList<ExpensesType>> expensesTypeProperty() {
+        return expensesType;
     }
-    public final ObservableList<ExpensesType> getOperations() {
-        return operations.get();
+    public final ObservableList<ExpensesType> getExpensesType() {
+        return expensesType.get();
     }
-    //setDisabled
 
     public StringProperty statusSettingProperty() {
         return statusSetting;
@@ -188,22 +152,18 @@ public class ViewModel {
         return statusGetting.get();
     }
 
-    public void set() {
-        if (setDisabled.get()) {
+    public void submitCosts() {
+        if (setButtonDisabled.get()) {
             return;
         }
         GregorianCalendar date =
                 GregorianCalendar.from(dateInput.get().atStartOfDay(ZoneId.systemDefault()));
-        ExpensesType type = operation.get();
-        Money money = new Money(inputExpencesCost.get());
+        ExpensesType type = expensesTypes.get();
+        Money money = new Money(inputExpensesCost.get());
         expenses.addCost(money, date, type);
     }
 
     public void getCosts() {
-
-        if (getDisabled.get()) {
-            return;
-        }
        GregorianCalendar date =
                GregorianCalendar.from(dateOutput.get().atStartOfDay(ZoneId.systemDefault()));
 
@@ -212,19 +172,19 @@ public class ViewModel {
         }
     }
 
-    private StatusInputCost getInputCostStatus() {
-        StatusInputCost inputStatus = StatusInputCost.READY;
-        if ((dateInput == null || inputExpencesCostProperty().get().isEmpty())) {
-            inputStatus = StatusInputCost.WAITING;
+    private Status getInputStatus() {
+        Status inputStatus = Status.READY;
+        if ((dateInput == null || inputExpensesCostProperty().get().isEmpty())) {
+            inputStatus = Status.WAITING;
         }
 
         return inputStatus;
     }
 
-    private StatusGettingCost getGettingCostStatus() {
-        StatusGettingCost inputStatus = StatusGettingCost.READY;
+    private Status getGettingStatus() {
+        Status inputStatus = Status.READY;
         if (dateOutput == null) {
-            inputStatus = StatusGettingCost.WAITING;
+            inputStatus = Status.WAITING;
         }
         return inputStatus;
     }
@@ -233,7 +193,7 @@ public class ViewModel {
         @Override
         public void changed(final ObservableValue<? extends LocalDate> observable,
                             final LocalDate oldValue, final LocalDate newValue) {
-            statusGetting.set(getGettingCostStatus().toString());
+            statusGetting.set(getGettingStatus().toString());
         }
     }
 
@@ -241,7 +201,7 @@ public class ViewModel {
         @Override
         public void changed(final ObservableValue<? extends LocalDate> observable,
                             final LocalDate oldValue, final LocalDate newValue) {
-            statusSetting.set(getInputCostStatus().toString());
+            statusSetting.set(getInputStatus().toString());
         }
     }
 
@@ -249,34 +209,42 @@ public class ViewModel {
         @Override
         public void changed(final ObservableValue<? extends Double> observable,
                             final Double oldValue, final Double newValue) {
-            statusSetting.set(getInputCostStatus().toString());
+            statusSetting.set(getInputStatus().toString());
         }
     }
+
+    private final Map<ExpensesType, StringProperty> inputExpenses;
+    private final ObjectProperty<ObservableList<ExpensesType>> expensesType =
+            new SimpleObjectProperty<>(FXCollections.observableArrayList(ExpensesType.values()));
+    private final ObjectProperty<ExpensesType> expensesTypes = new SimpleObjectProperty<>();
+    private final List<ValueChangeListenerDateSet> valueChangedListenerDataSet = new ArrayList<>();
+    private final List<ValueChangeListenerDateGet> valueChangedListenerDataGet = new ArrayList<>();
+    private final List<ValueChangeListenerDoubleSet> valueChangedListenerDouble = new ArrayList<>();
+    private final ObjectProperty<LocalDate> dateInput = new SimpleObjectProperty<>();
+    private final ObjectProperty<Double> costInput = new SimpleObjectProperty<>();
+    private final ObjectProperty<LocalDate> dateOutput = new SimpleObjectProperty<>();
+
+    public ObjectProperty<ExpensesType> expensesTypesProperty() {
+        return expensesTypes;
+    }
+
+    private final BooleanProperty setButtonDisabled = new SimpleBooleanProperty();
+    private final StringProperty statusGetting = new SimpleStringProperty();
+    private final StringProperty statusSetting = new SimpleStringProperty();
+    private final StringProperty inputExpensesCost = new SimpleStringProperty();
+    private Expenses expenses;
 }
 
-enum StatusInputCost {
-    WAITING("Please provide input data"),
-    READY("Press setCost"),
-    BAD_FORMAT("BadFormat");
+enum Status {
+    WAITING("Please, input data"),
+    READY("Click 'add Expenses'");
 
-    private final String name;
-    StatusInputCost(final String name) {
+    Status(final String name) {
         this.name = name;
     }
     public String toString() {
         return name;
     }
-}
-
-enum StatusGettingCost {
-    WAITING("Please input data"),
-    READY("Press getCost");
-
     private final String name;
-    StatusGettingCost(final String name) {
-        this.name = name;
-    }
-    public String toString() {
-        return name;
-    }
 }
+

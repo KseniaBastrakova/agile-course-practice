@@ -12,7 +12,8 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.assertEquals;
+
 
 public class ViewModelTests {
     private ViewModel viewModel;
@@ -40,29 +41,20 @@ public class ViewModelTests {
     }
 
     @Test
-    public void operationAddCostsCorrectResult() {
-        viewModel.inputExpencesCostProperty().set("10.37");
-        viewModel.operationProperty().set(ExpensesType.Products);
+    public void isAddCostsCorrectResult() {
+        viewModel.inputExpensesCostProperty().set("10.37");
+        viewModel.expensesTypesProperty().set(ExpensesType.Products);
         viewModel.dateInputProperty().set(LocalDate.of(2000, 1, 1));
-        viewModel.set();
+        viewModel.submitCosts();
         Calendar date = GregorianCalendar.
-                from(viewModel.dateInputProperty().get().atStartOfDay(ZoneId.systemDefault()));
+                from(viewModel.getDateInput().atStartOfDay(ZoneId.systemDefault()));
         Money money = new Money("10.37");
         assertEquals(money, viewModel.expensesProperty().getCost(date, ExpensesType.Products));
     }
 
     @Test
-    public void operationGetCostsCorrectResult() {
-        DayExpenses input = new DayExpenses();
-     //   DayExpenses actual = new DayExpenses();
-
-        setDayExpensesData(input);
-
-        viewModel.dateInputProperty().get().of(2009, Month.APRIL, 10);
-        Calendar date = GregorianCalendar.
-                from(viewModel.dateInputProperty().get().atStartOfDay(ZoneId.systemDefault()));
-        viewModel.expensesProperty().addCost(input, date);
-        viewModel.dateOutputProperty().get().of(2009, Month.APRIL, 10);
+    public void isGetCostsCorrectResult() {
+        setDayExpensesData();
         viewModel.getCosts();
         assertEquals("77.88", viewModel.eatingOutProperty().get());
         assertEquals("9999.88", viewModel.productsProperty().get());
@@ -75,38 +67,33 @@ public class ViewModelTests {
     @Test
     public void statusGettingIsWaitingWhenCalculateWithEmptyFields() {
         viewModel.getCosts();
-        assertEquals(StatusGettingCost.WAITING.toString(), viewModel.statusGettingProperty().get());
+        assertEquals(Status.WAITING.toString(), viewModel.statusGettingProperty().get());
     }
 
     @Test
-    public void statusGettingIsReadyWhenFieldsAreFill() {
+    public void statusIsReadyWhenFieldsSettingCostAreFill() {
         LocalDate date = LocalDate.of(2009, Month.APRIL, 10);
         viewModel.dateOutputProperty().set(date);
-        assertEquals(StatusGettingCost.READY.toString(), viewModel.statusGettingProperty().get());
+        assertEquals(Status.READY.toString(), viewModel.statusGettingProperty().get());
     }
 
     @Test
-    public void statusInputIsWaitingWhenCalculateWithEmptyFields() {
-        viewModel.set();
-        assertEquals(StatusInputCost.WAITING.toString(), viewModel.statusSettingProperty().get());
+    public void statusIsWaitingWhenFieldsSettingCostAreEmpty() {
+        viewModel.submitCosts();
+        assertEquals(Status.WAITING.toString(), viewModel.statusSettingProperty().get());
     }
 
     @Test
-    public void statusInputIsReadyWhenWhenFieldsAreFill() {
-        viewModel.inputExpencesCostProperty().set("10.37");
-        viewModel.operationProperty().set(ExpensesType.Products);
+    public void statusIsReadyWhenWhenFieldsSettingCostAreFill() {
+        viewModel.inputExpensesCostProperty().set("10.37");
+        viewModel.expensesTypesProperty().set(ExpensesType.Products);
         viewModel.dateInputProperty().set(LocalDate.of(2000, 1, 1));
-        assertEquals(StatusInputCost.READY.toString(), viewModel.statusSettingProperty().get());
+        assertEquals(Status.READY.toString(), viewModel.statusSettingProperty().get());
     }
 
-    @Test
-    public void isOperationPropertyCorrect() {
-        viewModel.operationProperty().set(ExpensesType.EatingOut);
-        assertEquals(viewModel.operationProperty().get(), ExpensesType.EatingOut);
-    }
 
-    void setDayExpensesData(final DayExpenses input) {
-
+    void setDayExpensesData() {
+        DayExpenses input = new DayExpenses();
         Money unreasonableWasteMoney = new Money("99.70");
         input.add(ExpensesType.UnreasonableWaste, unreasonableWasteMoney);
         Money eatingOutMoney = new Money("77.88");
@@ -119,6 +106,11 @@ public class ViewModelTests {
         input.add(ExpensesType.Services, servicesMoney);
         Money entertainmentMoney = new Money("777.88");
         input.add(ExpensesType.Entertainment, entertainmentMoney);
+        viewModel.getDateInput().of(2009, Month.APRIL, 10);
+        Calendar date = GregorianCalendar.
+                from(viewModel.dateInputProperty().get().atStartOfDay(ZoneId.systemDefault()));
+        viewModel.expensesProperty().addCost(input, date);
+        viewModel.dateOutputProperty().set(viewModel.dateInputProperty().get());
     }
 
 }

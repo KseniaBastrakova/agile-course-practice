@@ -32,9 +32,9 @@ public class Calculator {
         // Two-way binding hasn't supported by FXML yet, so place it in code-behind
         inputData.valueProperty().bindBidirectional(viewModel.dateInputProperty());
         outputData.valueProperty().bindBidirectional(viewModel.dateOutputProperty());
-        inputCost.textProperty().bindBidirectional(viewModel.inputExpencesCostProperty());
+        inputCost.textProperty().bindBidirectional(viewModel.inputExpensesCostProperty());
 
-        expencesBox.valueProperty().bindBidirectional(viewModel.operationProperty());
+        expencesBox.valueProperty().bindBidirectional(viewModel.expensesTypesProperty());
 
         output.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -46,7 +46,7 @@ public class Calculator {
         input.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(final ActionEvent event) {
-                viewModel.set();
+                viewModel.submitCosts();
             }
         });
     }
