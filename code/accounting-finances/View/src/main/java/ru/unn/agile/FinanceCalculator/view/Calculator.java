@@ -1,7 +1,5 @@
 package ru.unn.agile.FinanceCalculator.view;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -11,6 +9,16 @@ import ru.unn.agile.FinanceCalculator.Model.ExpensesType;
 import ru.unn.agile.FinanceCalculator.viewmodel.ViewModel;
 
 public class Calculator {
+    @FXML
+    void initialize() {
+        inputData.valueProperty().bindBidirectional(viewModel.dateInputProperty());
+        outputData.valueProperty().bindBidirectional(viewModel.dateOutputProperty());
+        inputCost.textProperty().bindBidirectional(viewModel.inputExpensesCostProperty());
+        expencesBox.valueProperty().bindBidirectional(viewModel.expensesTypesProperty());
+        output.setOnAction(event -> viewModel.getCosts());
+        input.setOnAction(event -> viewModel.submitCosts());
+    }
+
     @FXML
     private ViewModel viewModel;
     @FXML
@@ -25,29 +33,4 @@ public class Calculator {
     private Button input;
     @FXML
     private Button output;
-
-    @FXML
-    void initialize() {
-
-        // Two-way binding hasn't supported by FXML yet, so place it in code-behind
-        inputData.valueProperty().bindBidirectional(viewModel.dateInputProperty());
-        outputData.valueProperty().bindBidirectional(viewModel.dateOutputProperty());
-        inputCost.textProperty().bindBidirectional(viewModel.inputExpensesCostProperty());
-
-        expencesBox.valueProperty().bindBidirectional(viewModel.expensesTypesProperty());
-
-        output.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(final ActionEvent event) {
-                viewModel.getCosts();
-            }
-        });
-
-        input.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(final ActionEvent event) {
-                viewModel.submitCosts();
-            }
-        });
-    }
 }

@@ -36,8 +36,8 @@
       <Label layoutX="39.0" layoutY="39.0" prefHeight="25.0" prefWidth="138.0" text="Print costs for the date:" />
       <Label layoutX="39.0" layoutY="112.0" prefHeight="17.0" prefWidth="186.0" text="Amount of expenses in rubles:" />
       <Label layoutX="42.0" layoutY="188.0" prefHeight="25.0" prefWidth="149.0" text="Select type of expenses:" />
-      <Label layoutX="36.0" layoutY="369.0" text="${viewModel.statusSetting}" />
+      <Label layoutX="36.0" layoutY="369.0" text="${viewModel.submitStatus}" />
       <Label layoutX="323.0" layoutY="369.0" />
-      <Label layoutX="303.0" layoutY="369.0" text="${viewModel.statusGetting}" />
+      <Label layoutX="303.0" layoutY="369.0" text="${viewModel.loadStatus}" />
    </children>
 </AnchorPane>

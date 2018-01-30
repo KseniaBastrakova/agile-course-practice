@@ -11,9 +11,9 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
 import static junit.framework.TestCase.assertEquals;
-
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertFalse;
 
 public class ViewModelTests {
     private ViewModel viewModel;
@@ -41,7 +41,29 @@ public class ViewModelTests {
     }
 
     @Test
-    public void isAddCostsCorrectResult() {
+    public void canAddCostTwoTimesInOneDay() {
+        setSubmitData();
+        viewModel.submitCosts();
+        setSubmitData();
+        viewModel.submitCosts();
+        viewModel.getCosts();
+        assertEquals("20.00", viewModel.eatingOutProperty().get());
+    }
+
+    @Test
+    public void canGetCostOfEmptyDay() {
+        viewModel.dateOutputProperty().set(LocalDate.of(1999, 1, 2));
+        viewModel.getCosts();
+        assertEquals("0.00", viewModel.eatingOutProperty().get());
+        assertEquals("0.00", viewModel.productsProperty().get());
+        assertEquals("0.00", viewModel.transportProperty().get());
+        assertEquals("0.00", viewModel.servicesProperty().get());
+        assertEquals("0.00", viewModel.entertainmentProperty().get());
+        assertEquals("0.00", viewModel.unreasonableWasteProperty().get());
+    }
+
+    @Test
+    public void isResultCorrectWhenCostsAdded() {
         viewModel.inputExpensesCostProperty().set("10.37");
         viewModel.expensesTypesProperty().set(ExpensesType.Products);
         viewModel.dateInputProperty().set(LocalDate.of(2000, 1, 1));
@@ -53,7 +75,7 @@ public class ViewModelTests {
     }
 
     @Test
-    public void isGetCostsCorrectResult() {
+    public void isResultCorrectWhenCostsGeting() {
         setDayExpensesData();
         viewModel.getCosts();
         assertEquals("77.88", viewModel.eatingOutProperty().get());
@@ -65,19 +87,104 @@ public class ViewModelTests {
     }
 
     @Test
-    public void statusIsWaitingWhenFieldsSettingCostAreEmpty() {
+    public void statusIsWaitingWhenSettingCostFieldsAreEmpty() {
         viewModel.submitCosts();
-        assertEquals(Status.WAITING.toString(), viewModel.statusSettingProperty().get());
+        assertEquals(StatusSubmit.WAITING.toString(), viewModel.submitStatusProperty().get());
     }
 
     @Test
-    public void statusIsReadyWhenWhenFieldsSettingCostAreFill() {
+    public void statusIsWaitingWhenGettingCostFieldsAreEmpty() {
+        LocalDate date = null;
+        viewModel.dateOutputProperty().set(date);
+        assertEquals(StatusLoad.WAITING.toString(), viewModel.loadStatusProperty().get());
+    }
+
+    @Test
+    public void statusIsWaitingWhenGettingCostFieldsAreFill() {
+        viewModel.dateOutputProperty().set(LocalDate.of(2000, 1, 1));
+        assertEquals(StatusLoad.READY.toString(), viewModel.loadStatusProperty().get());
+    }
+
+    @Test
+    public void canReportTomorrowDateWhenGettingCost() {
+        viewModel.dateOutputProperty().set(LocalDate.now().plusDays(9));
+        assertEquals(StatusLoad.BAD_FORMAT_DATA.toString(), viewModel.loadStatusProperty().get());
+    }
+
+    @Test
+    public void canReportTomorrowDateWhenSubmittingCost() {
+        viewModel.dateInputProperty().set(LocalDate.now().plusDays(9));
+        assertEquals(StatusSubmit.BAD_FORMAT_DATA.toString(),
+                viewModel.submitStatusProperty().get());
+    }
+
+    @Test
+    public void canChangeIncorrectStatusToWaitingStatus() {
+        viewModel.dateInputProperty().set(LocalDate.now().plusDays(9));
+        assertEquals(StatusSubmit.BAD_FORMAT_DATA.toString(),
+                viewModel.submitStatusProperty().get());
+        viewModel.dateInputProperty().set(LocalDate.now());
+        assertEquals(StatusSubmit.WAITING.toString(),
+                viewModel.submitStatusProperty().get());
+    }
+
+    @Test
+    public void canChangeIncorrectStatusToReadyStatusSubmit() {
+        viewModel.dateInputProperty().set(LocalDate.now().plusDays(9));
+        assertEquals(StatusSubmit.BAD_FORMAT_DATA.toString(),
+                viewModel.submitStatusProperty().get());
+        setSubmitData();
+        assertEquals(StatusSubmit.READY.toString(),
+                viewModel.submitStatusProperty().get());
+    }
+
+    @Test
+    public void canChangeIncorrectStatusToReadyStatusSetting() {
+        viewModel.dateOutputProperty().set(LocalDate.now().plusDays(9));
+        assertEquals(StatusLoad.BAD_FORMAT_DATA.toString(),
+                viewModel.loadStatusProperty().get());
+        viewModel.dateOutputProperty().set(LocalDate.now());
+        assertEquals(StatusLoad.READY.toString(),
+                viewModel.loadStatusProperty().get());
+    }
+
+    @Test
+    public void statusIsReadyWhenSettingCostFieldsAreFill() {
         viewModel.inputExpensesCostProperty().set("10.37");
         viewModel.expensesTypesProperty().set(ExpensesType.Products);
         viewModel.dateInputProperty().set(LocalDate.of(2000, 1, 1));
-        assertEquals(Status.READY.toString(), viewModel.statusSettingProperty().get());
+        assertEquals(StatusSubmit.READY.toString(), viewModel.submitStatusProperty().get());
     }
 
+    @Test
+    public void buttonGetIsDisabledWhenDataIsBad() {
+        viewModel.dateOutputProperty().set(LocalDate.now().plusDays(9));
+        assertTrue(viewModel.isGetButtonDisabled());
+    }
+
+    @Test
+    public void buttonGetIsEnabledWhenDataIsGood() {
+        viewModel.dateOutputProperty().set(LocalDate.now());
+        assertFalse(viewModel.isGetButtonDisabled());
+    }
+
+    @Test
+    public void buttonAddIsDisabledWhenDataIsBad() {
+        viewModel.dateInputProperty().set(LocalDate.now().plusDays(9));
+        assertTrue(viewModel.isSetButtonDisabled());
+    }
+
+    @Test
+    public void buttonAddIsEnabledWhenDataIsGood() {
+        setSubmitData();
+        assertFalse(viewModel.isSetButtonDisabled());
+    }
+
+    void setSubmitData() {
+        viewModel.dateInputProperty().set(LocalDate.now());
+        viewModel.inputExpensesCostProperty().set("10.0");
+        viewModel.expensesTypesProperty().set(ExpensesType.EatingOut);
+    }
 
     void setDayExpensesData() {
         DayExpenses input = new DayExpenses();
