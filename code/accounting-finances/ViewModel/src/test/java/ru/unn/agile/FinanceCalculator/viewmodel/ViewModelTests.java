@@ -51,7 +51,7 @@ public class ViewModelTests {
     }
 
     @Test
-    public void canGetCostOfEmptyDay() {
+    public void canGetCostsFromDayWhithoutAddFinances() {
         viewModel.dateOutputProperty().set(LocalDate.of(1999, 1, 2));
         viewModel.getCosts();
         assertEquals("0.00", viewModel.eatingOutProperty().get());
@@ -157,25 +157,25 @@ public class ViewModelTests {
     }
 
     @Test
-    public void buttonGetIsDisabledWhenDataIsBad() {
+    public void getButtonIsDisabledWhenDataIsBadFormat() {
         viewModel.dateOutputProperty().set(LocalDate.now().plusDays(9));
         assertTrue(viewModel.isGetButtonDisabled());
     }
 
     @Test
-    public void buttonGetIsEnabledWhenDataIsGood() {
+    public void getButtonIsEnabledWhenDataIsCorrect() {
         viewModel.dateOutputProperty().set(LocalDate.now());
         assertFalse(viewModel.isGetButtonDisabled());
     }
 
     @Test
-    public void buttonAddIsDisabledWhenDataIsBad() {
+    public void addButtonIsDisabledWhenDataIsBadFormat() {
         viewModel.dateInputProperty().set(LocalDate.now().plusDays(9));
         assertTrue(viewModel.isSetButtonDisabled());
     }
 
     @Test
-    public void buttonAddIsEnabledWhenDataIsGood() {
+    public void addButtonIsEnabledWhenDataIsCorrect() {
         setSubmitData();
         assertFalse(viewModel.isSetButtonDisabled());
     }

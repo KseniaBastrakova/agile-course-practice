@@ -30,7 +30,7 @@ public class ViewModel {
 
         inputExpensesCost.set("");
         submitStatus.set(StatusLoad.WAITING.toString());
-        loadStatus.set(StatusSubmit.READY.toString());
+        loadStatus.set(StatusLoad.READY.toString());
         expenses = new Expenses();
         dateInput.set(LocalDate.now());
         dateOutput.set(LocalDate.now());
@@ -57,11 +57,9 @@ public class ViewModel {
         setButtonDisabled.bind(couldAddValue.not());
         getButtonDisabled.bind(couldGetValue.not());
 
-
         final ValueChangeListenerDataSet listenerInputDate = new ValueChangeListenerDataSet();
         dateInput.addListener(listenerInputDate);
         valueChangedListenerDataSet.add(listenerInputDate);
-
 
         final ValueChangeListenerInputCostSet listenerInputCost
                 = new ValueChangeListenerInputCostSet();
