@@ -13,10 +13,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ViewModelTests {
-    private ViewModel viewModel;
 
-    public void setExternalViewModel(final ViewModel viewModel) {
-        this.viewModel = viewModel;
+    public void setViewModel(final ViewModel theViewModel) {
+        this.viewModel = theViewModel;
     }
 
     @Before
@@ -32,6 +31,12 @@ public class ViewModelTests {
     }
 
     @Test
+    public void statusIsReadyWhenFieldsAreFill() {
+        setInputData("1", "2", "3", "4");
+        assertEquals(Status.READY.toString(), viewModel.statusProperty().get());
+    }
+
+    @Test
     public void canSetDefaultValues() {
         assertEquals("", viewModel.denominatorFirstProperty().get());
         assertEquals("", viewModel.numeratorFirstProperty().get());
@@ -39,12 +44,6 @@ public class ViewModelTests {
         assertEquals("", viewModel.numeratorSecondProperty().get());
         assertEquals(Operation.ADD, viewModel.operationProperty().get());
         assertEquals(Status.WAITING.toString(), viewModel.statusProperty().get());
-    }
-
-    @Test
-    public void statusIsReadyWhenFieldsAreFill() {
-        setInputData("1", "2", "3", "4");
-        assertEquals(Status.READY.toString(), viewModel.statusProperty().get());
     }
 
     @Test
@@ -135,14 +134,14 @@ public class ViewModelTests {
     }
 
     @Test
-    public void viewModelConstructorThrowsExceptionWithNullLogger() {
+    public void canNotCreateViewModelWithNullLogger() {
         try {
             new ViewModel(null);
-            fail("Exception wasn't thrown");
+            fail("no exception");
         } catch (IllegalArgumentException ex) {
             Assert.assertEquals("Logger parameter can't be null", ex.getMessage());
         } catch (Exception ex) {
-            fail("Invalid exception type");
+            fail("Invalid exception");
         }
     }
 
@@ -178,7 +177,6 @@ public class ViewModelTests {
     @Test
     public void putMultipleLogMessagesEnabled() {
         setInputData("7", "5", "8", "9");
-
         viewModel.calculate();
         viewModel.calculate();
         viewModel.calculate();
@@ -194,5 +192,5 @@ public class ViewModelTests {
         viewModel.denominatorSecondProperty().set(denominatorSecond);
         viewModel.numeratorSecondProperty().set(numeratorSecond);
     }
-
+    private ViewModel viewModel;
 }

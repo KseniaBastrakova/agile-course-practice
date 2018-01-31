@@ -8,28 +8,28 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import ru.unn.agile.RatioCalculator.Model.Ratio;
 import ru.unn.agile.RatioCalculator.viewmodel.ViewModel;
-import ru.unn.agile.RatioCalculator.infrastructure_lab3.TxtLogger;
+import ru.unn.agile.RatioCalculator.Infrastructure.TxtLogger;
 
 public class Calculator {
     @FXML
     void initialize() {
-        viewModel.setLogger(new TxtLogger("./TxtLogger-lab3.log"));
-        final ChangeListener<Boolean> focusChangeListener = new ChangeListener<Boolean>() {
+        viewModel.setLogger(new TxtLogger("./txt.log"));
+        final ChangeListener<Boolean> changeListener = new ChangeListener<Boolean>() {
             @Override
-            public void changed(final ObservableValue<? extends Boolean> observable,
-                                final Boolean oldValue, final Boolean newValue) {
-                viewModel.onFocusChanged(oldValue, newValue);
+            public void changed(final ObservableValue<? extends Boolean> observableValue,
+                                final Boolean old, final Boolean newValue) {
+                viewModel.onFocusChanged(old, newValue);
             }
         };
 
     numeratorFirst.textProperty().bindBidirectional(viewModel.numeratorFirstProperty());
-    numeratorFirst.focusedProperty().addListener(focusChangeListener);
+    numeratorFirst.focusedProperty().addListener(changeListener);
     numeratorSecond.textProperty().bindBidirectional(viewModel.numeratorSecondProperty());
-    numeratorSecond.focusedProperty().addListener(focusChangeListener);
+    numeratorSecond.focusedProperty().addListener(changeListener);
     denominatorFirst.textProperty().bindBidirectional(viewModel.denominatorFirstProperty());
-    denominatorFirst.focusedProperty().addListener(focusChangeListener);
+    denominatorFirst.focusedProperty().addListener(changeListener);
     denominatorSecond.textProperty().bindBidirectional(viewModel.denominatorSecondProperty());
-    denominatorSecond.focusedProperty().addListener(focusChangeListener);
+    denominatorSecond.focusedProperty().addListener(changeListener);
 
     cbOperation.valueProperty().bindBidirectional(viewModel.operationProperty());
 

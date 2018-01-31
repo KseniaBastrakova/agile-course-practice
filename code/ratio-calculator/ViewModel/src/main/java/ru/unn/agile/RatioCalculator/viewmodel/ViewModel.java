@@ -51,7 +51,7 @@ public class ViewModel {
 
         calculationDisabled.bind(couldCalculate.not());
 
-        final List<StringProperty> fields = new ArrayList<StringProperty>() {
+        final List<StringProperty> properties = new ArrayList<StringProperty>() {
             {
                 add(denominatorFirst);
                 add(denominatorSecond);
@@ -61,10 +61,10 @@ public class ViewModel {
         };
 
         valueChangedListeners = new ArrayList<>();
-        for (StringProperty val : fields) {
-            final ValueCachingChangeListener listener = new ValueCachingChangeListener();
-            val.addListener(listener);
-            valueChangedListeners.add(listener);
+        for (StringProperty val : properties) {
+            final ValueCachingListener current = new ValueCachingListener();
+            val.addListener(current);
+            valueChangedListeners.add(current);
         }
     }
 
@@ -73,10 +73,10 @@ public class ViewModel {
                 return;
             }
 
-            for (ValueCachingChangeListener listener : valueChangedListeners) {
+            for (ValueCachingListener listener : valueChangedListeners) {
                 if (listener.isChanged()) {
                     StringBuilder message = new StringBuilder(LogMessages.EDITING_FINISHED);
-                    message.append("Input arguments are: [")
+                    message.append("Input arguments:")
                             .append(numeratorFirst.get()).append("/ ")
                             .append(denominatorFirst.get()).append("; ")
                             .append(numeratorSecond.get()).append("; ")
@@ -89,11 +89,6 @@ public class ViewModel {
             }
         }
 
-     //   for (StringProperty field : fields) {
-      //      final ValueChangeListener listener = new ValueChangeListener();
-      //      field.addListener(listener);
-      //      valueChangedListeners.add(listener);
-     //   }
 
     public final void setLogger(final ILogger logger) {
         if (logger == null) {
@@ -206,7 +201,7 @@ public class ViewModel {
         logs.set(record);
     }
 
-    private class ValueCachingChangeListener implements ChangeListener<String> {
+    private class ValueCachingListener implements ChangeListener<String> {
         private String prevValue = new String("");
         private String curValue = new String("");
         @Override
@@ -278,7 +273,7 @@ public class ViewModel {
             new SimpleObjectProperty<>(FXCollections.observableArrayList(Operation.values()));
     private final ObjectProperty<Operation> operation = new SimpleObjectProperty<>();
    // private final List<ValueChangeListener> valueChangedListeners = new ArrayList<>();
-    private List<ValueCachingChangeListener> valueChangedListeners;
+    private List<ValueCachingListener> valueChangedListeners;
     private final StringProperty status = new SimpleStringProperty();
     private final StringProperty logs = new SimpleStringProperty();
 

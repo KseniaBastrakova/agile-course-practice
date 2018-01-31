@@ -1,4 +1,4 @@
-package ru.unn.agile.RatioCalculator.infrastructure_lab3;
+package ru.unn.agile.RatioCalculator.Infrastructure;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,20 +15,30 @@ import static junit.framework.TestCase.assertTrue;
 public class TxtLoggerTests {
     @Before
     public void setUp() {
-        testTxtLogger = new TxtLogger(FILE_NAME);
+        testLogger = new TxtLogger(NAME_LOG);
     }
 
     @Test
     public void canCreateLoggerWithFileName() {
-        assertNotNull(testTxtLogger);
+        assertNotNull(testLogger);
     }
 
     @Test
-    public void canCreateLogFileOnDisk() {
+    public void doesLogContainsDateAndTime() {
+        String test = "Test message with time";
+
+        testLogger.log(test);
+
+        String message = testLogger.get().get(0);
+        assertTrue(message.matches("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} > .*"));
+    }
+
+    @Test
+    public void canCreateFile() {
         try {
-            new BufferedReader(new FileReader(FILE_NAME));
-        } catch (FileNotFoundException exception) {
-            fail("File " + FILE_NAME + " wasn't found!");
+            new BufferedReader(new FileReader(NAME_LOG));
+        } catch (FileNotFoundException ex) {
+            fail("File " + NAME_LOG + " not found!");
         }
     }
 
@@ -36,35 +46,25 @@ public class TxtLoggerTests {
     public void canWriteLogMessage() {
         String testMessage = "Test message";
 
-        testTxtLogger.log(testMessage);
+        testLogger.log(testMessage);
 
-        String message = testTxtLogger.get().get(0);
+        String message = testLogger.get().get(0);
         assertTrue(message.matches(".*" + testMessage + "$"));
     }
 
     @Test
-    public void canWriteSeveralLogMessage() {
-        String[] messages = {"Message 1", "Message 2"};
+    public void canAddMultiplyLogMessage() {
+        String[] messages = {"input 1", "input 2"};
 
-        testTxtLogger.log(messages[0]);
-        testTxtLogger.log(messages[1]);
+        testLogger.log(messages[0]);
+        testLogger.log(messages[1]);
 
-        List<String> actualMessages = testTxtLogger.get();
+        List<String> actualMessages = testLogger.get();
         for (int i = 0; i < actualMessages.size(); ++i) {
             assertTrue(actualMessages.get(i).matches(".*" + messages[i] + "$"));
         }
     }
 
-    @Test
-    public void doesLogContainDateAndTime() {
-        String testMessage = "Test message";
-
-        testTxtLogger.log(testMessage);
-
-        String message = testTxtLogger.get().get(0);
-        assertTrue(message.matches("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} > .*"));
-    }
-
-    private static final String FILE_NAME = "./TxtLogger_Tests-lab3.log";
-    private TxtLogger testTxtLogger;
+    private static final String NAME_LOG = "./TestLog.log";
+    private TxtLogger testLogger;
 }

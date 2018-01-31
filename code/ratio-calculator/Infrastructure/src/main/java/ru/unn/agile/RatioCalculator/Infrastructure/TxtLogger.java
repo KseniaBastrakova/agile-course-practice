@@ -1,4 +1,4 @@
-package ru.unn.agile.RatioCalculator.infrastructure_lab3;
+package ru.unn.agile.RatioCalculator.Infrastructure;
 
 import ru.unn.agile.RatioCalculator.viewmodel.ILogger;
 import java.io.BufferedWriter;
@@ -15,22 +15,40 @@ import java.util.List;
 import java.util.Locale;
 
 public class TxtLogger implements ILogger {
-    public TxtLogger(final String fileName) {
-        this.fileName = fileName;
+    public TxtLogger(final String nameFolder) {
 
-        BufferedWriter logWriter = null;
+        BufferedWriter currentLog = null;
+        this.nameFolder = nameFolder;
         try {
-            logWriter = new BufferedWriter(new FileWriter(fileName));
+            currentLog = new BufferedWriter(new FileWriter(nameFolder));
         } catch (IOException exception) {
             exception.printStackTrace();
         }
-        writer = logWriter;
+        writer = currentLog;
+    }
+    @Override
+    public List<String> get() {
+        BufferedReader bufferedReader;
+        ArrayList<String> currentLog = new ArrayList<>();
+        try {
+            bufferedReader = new BufferedReader(new FileReader(nameFolder));
+            String message = bufferedReader.readLine();
+
+            while (message != null) {
+                currentLog.add(message);
+                message = bufferedReader.readLine();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return currentLog;
     }
 
     @Override
-    public void log(final String message) {
+    public void log(final String input) {
         try {
-            writer.write(now() + " > " + message);
+            writer.write(now() + " > " + input);
             writer.newLine();
             writer.flush();
         } catch (Exception exception) {
@@ -38,32 +56,14 @@ public class TxtLogger implements ILogger {
         }
     }
 
-    @Override
-    public List<String> get() {
-        BufferedReader reader;
-        ArrayList<String> log = new ArrayList<>();
-        try {
-            reader = new BufferedReader(new FileReader(fileName));
-            String logMessage = reader.readLine();
-
-            while (logMessage != null) {
-                log.add(logMessage);
-                logMessage = reader.readLine();
-            }
-        } catch (Exception exception) {
-            System.out.println(exception.getMessage());
-        }
-
-        return log;
-    }
 
     private static String now() {
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW, Locale.ENGLISH);
-        return sdf.format(calendar.getTime());
+        Calendar date = Calendar.getInstance();
+        SimpleDateFormat curreent = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS, Locale.ENGLISH);
+        return curreent.format(date.getTime());
     }
 
-    private static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
+    private static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
     private final BufferedWriter writer;
-    private final String fileName;
+    private final String nameFolder;
 }
