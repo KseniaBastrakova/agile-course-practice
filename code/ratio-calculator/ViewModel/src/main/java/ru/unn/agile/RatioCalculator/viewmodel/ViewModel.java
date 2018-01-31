@@ -235,21 +235,23 @@ public class ViewModel {
                 || numeratorFirst.get().isEmpty() || numeratorSecond.get().isEmpty()) {
             inputStatus = Status.WAITING;
         }
-        inputStatus =  badFormatCheck(inputStatus);
+        if (badFormatCheck()) {
+            inputStatus = Status.BAD_FORMAT;
+        }
         return inputStatus;
     }
 
-    private Status badFormatCheck(final Status inputStatus) {
-        Status current = inputStatus;
+    private boolean badFormatCheck() {
+        boolean current = false;
         try {
             int divNullCheck = 1;
             if (!denominatorFirst.get().isEmpty()
                     && Integer.parseInt(denominatorFirst.get()) == 0) {
-                current = Status.BAD_FORMAT;
+                current = true;
             }
             if (!denominatorSecond.get().isEmpty()
                     && Integer.parseInt(denominatorSecond.get()) == 0) {
-                current = Status.BAD_FORMAT;
+                current = true;
             }
             if (!numeratorFirst.get().isEmpty()) {
                 Integer.parseInt(numeratorFirst.get());
@@ -258,10 +260,10 @@ public class ViewModel {
                 divNullCheck = Integer.parseInt(numeratorSecond.get());
             }
             if (divNullCheck == 0 && operation.get() == Operation.DIV) {
-                current = Status.BAD_FORMAT;
+                current = true;
             }
         } catch (NumberFormatException nfe) {
-                current = Status.BAD_FORMAT;
+                current = true;
             }
         return current;
     }
