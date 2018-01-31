@@ -175,6 +175,15 @@ public class ViewModelTests {
     }
 
     @Test
+    public void operationChangedInLogCorrectly() {
+        setInputData("7", "8", "9", "9");
+        viewModel.onOperationChanged(Operation.ADD, Operation.MULTIPLY);
+        String text = viewModel.getLog().get(0);
+        assertTrue(text.matches(".*" + LogMessages.OPERATION_WAS_CHANGED + "Mul.*"));
+    }
+
+
+    @Test
     public void putMultipleLogMessagesEnabled() {
         setInputData("7", "5", "8", "9");
         viewModel.calculate();
@@ -182,6 +191,38 @@ public class ViewModelTests {
         viewModel.calculate();
 
         Assert.assertEquals(3, viewModel.getLog().size());
+    }
+
+    @Test
+    public void operationTypesAddedToTheLogCorrectly() {
+        setInputData("3", "3", "4", "5");
+        viewModel.calculate();
+        String text = viewModel.getLog().get(0);
+        assertTrue(text.matches(".*Add.*"));
+    }
+
+    @Test
+    public void argumentsCorrectFormatted() {
+        setInputData("1", "1", "1", "1");
+
+        viewModel.calculate();
+
+        String message = viewModel.getLog().get(0);
+        assertTrue(message.matches(".*Arguments"
+                + ": first ratio = " + viewModel.numeratorFirstProperty().get()
+                + "/" + viewModel.denominatorFirstProperty().get()
+                + "; second ratio = " + viewModel.numeratorSecondProperty().get()
+                + "/" + viewModel.denominatorSecondProperty().get() + ".*"));
+    }
+
+    @Test
+    public void doNotAddEqualPropertiesTwice() {
+        viewModel.denominatorSecondProperty().set("12");
+        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
+        viewModel.denominatorSecondProperty().set("12");
+        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
+
+        Assert.assertEquals(1, viewModel.getLog().size());
     }
 
 

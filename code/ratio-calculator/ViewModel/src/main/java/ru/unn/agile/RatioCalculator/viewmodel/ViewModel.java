@@ -27,7 +27,6 @@ public class ViewModel {
         init();
     }
 
-
     private void init() {
         denominatorFirst.set("");
         numeratorFirst.set("");
@@ -79,7 +78,7 @@ public class ViewModel {
                     message.append("Input arguments:")
                             .append(numeratorFirst.get()).append("/ ")
                             .append(denominatorFirst.get()).append("; ")
-                            .append(numeratorSecond.get()).append("; ")
+                            .append(numeratorSecond.get()).append("/ ")
                             .append(denominatorSecond.get()).append("]");
                     logger.log(message.toString());
                     updateLogs();
@@ -221,7 +220,6 @@ public class ViewModel {
         }
     }
 
-
     private Status getInputStatus() {
         Status inputStatus = Status.READY;
         int divNullCheck = 1;
@@ -272,7 +270,6 @@ public class ViewModel {
     private final ObjectProperty<ObservableList<Operation>> operations =
             new SimpleObjectProperty<>(FXCollections.observableArrayList(Operation.values()));
     private final ObjectProperty<Operation> operation = new SimpleObjectProperty<>();
-   // private final List<ValueChangeListener> valueChangedListeners = new ArrayList<>();
     private List<ValueCachingListener> valueChangedListeners;
     private final StringProperty status = new SimpleStringProperty();
     private final StringProperty logs = new SimpleStringProperty();
