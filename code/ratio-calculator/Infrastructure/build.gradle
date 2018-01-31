@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':ratio-calculator-ViewModel')
+    testCompile project(':ratio-calculator-ViewModel').sourceSets.test.output
+}
