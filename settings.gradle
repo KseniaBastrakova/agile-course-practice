@@ -118,6 +118,8 @@ include "code/ratio-calculator/View"
 project(":code/ratio-calculator/View").name = "ratio-calculator-View"
 include "code/ratio-calculator/ViewModel"
 project(":code/ratio-calculator/ViewModel").name = "ratio-calculator-ViewModel"
+include "code/ratio-calculator/Infrastructure"
+project(":code/ratio-calculator/Infrastructure").name = "ratio-calculator-Infrastructure"
 
 // Tretiyakiva Olga
 
