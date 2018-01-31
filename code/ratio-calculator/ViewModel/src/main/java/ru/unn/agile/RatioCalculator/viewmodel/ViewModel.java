@@ -16,7 +16,6 @@ import javafx.beans.binding.BooleanBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ViewModel {
     public ViewModel() {
         init();
@@ -67,26 +66,26 @@ public class ViewModel {
         }
     }
 
-        public void onFocusChanged(final Boolean oldValue, final Boolean newValue) {
-            if (!oldValue && newValue) {
-                return;
-            }
+    public void onFocusChanged(final Boolean oldValue, final Boolean newValue) {
+        if (!oldValue && newValue) {
+            return;
+        }
 
-            for (ValueCachingListener listener : valueChangedListeners) {
-                if (listener.isChanged()) {
-                    StringBuilder message = new StringBuilder(LogMessages.EDITING_FINISHED);
-                    message.append("Input arguments:")
-                            .append(numeratorFirst.get()).append("/ ")
-                            .append(denominatorFirst.get()).append("; ")
-                            .append(numeratorSecond.get()).append("/ ")
-                            .append(denominatorSecond.get()).append("]");
-                    logger.log(message.toString());
-                    updateLogs();
-                    listener.cache();
-                    break;
-                }
+        for (ValueCachingListener listener : valueChangedListeners) {
+            if (listener.isChanged()) {
+                String message = String.format("%sInput arguments:%s/%s; %s/%s",
+                        LogMessages.EDITING_FINISHED,
+                        numeratorFirst.get(),
+                        denominatorFirst.get(),
+                        numeratorSecond.get(),
+                        denominatorSecond.get());
+                logger.log(message);
+                updateLogs();
+                listener.cache();
+                break;
             }
         }
+    }
 
 
     public final void setLogger(final ILogger logger) {
@@ -156,6 +155,14 @@ public class ViewModel {
         return calculationDisabled.get();
     }
 
+    public StringProperty logsProperty() {
+        return logs;
+    }
+
+    public final String getLogs() {
+        return logs.get();
+    }
+
     public void calculate() {
         if (calculationDisabled.get()) {
             return;
@@ -165,13 +172,15 @@ public class ViewModel {
         Ratio z2 = new Ratio(Integer.parseInt(numeratorSecond.get()),
                 Integer.parseInt(denominatorSecond.get()));
 
-        StringBuilder message = new StringBuilder(LogMessages.CALCULATE_WAS_PRESSED);
-        message.append("Arguments: first ratio = ").append(numeratorFirst.get())
-                .append("/").append(denominatorFirst.get())
-                .append("; second ratio = ").append(numeratorSecond.get())
-                .append("/").append(denominatorSecond.get())
-                .append(" Operation: ").append(operation.get().toString()).append(".");
-        logger.log(message.toString());
+        String message = String.format("%sArguments:first ratio = %s/%s"
+                        + ";second ratio = %s/%s Operation: %s.",
+                LogMessages.CALCULATE_WAS_PRESSED,
+                numeratorFirst.get(),
+                denominatorFirst.get(),
+                numeratorSecond.get(),
+                denominatorSecond.get(),
+                operation.get().toString());
+        logger.log(message);
         updateLogs();
 
         resultNumerator.
@@ -222,38 +231,38 @@ public class ViewModel {
 
     private Status getInputStatus() {
         Status inputStatus = Status.READY;
-        int divNullCheck = 1;
         if (denominatorFirst.get().isEmpty() || denominatorSecond.get().isEmpty()
                 || numeratorFirst.get().isEmpty() || numeratorSecond.get().isEmpty()) {
             inputStatus = Status.WAITING;
         }
-        try {
-            if (!numeratorSecond.get().isEmpty()) {
-                divNullCheck = Integer.parseInt(numeratorSecond.get());
-            }
-            inputStatus = checkParseFields(inputStatus);
-        } catch (NumberFormatException nfe) {
-            inputStatus = Status.BAD_FORMAT;
-        }
-        if (divNullCheck == 0 && operation.get() == Operation.DIV) {
-            inputStatus = Status.BAD_FORMAT;
-        }
+        inputStatus =  badFormatCheck(inputStatus);
         return inputStatus;
     }
 
-    private Status checkParseFields(final Status inputStatus) throws NumberFormatException {
+    private Status badFormatCheck(final Status inputStatus) {
         Status current = inputStatus;
-        if (!denominatorFirst.get().isEmpty()
-                && Integer.parseInt(denominatorFirst.get()) == 0) {
-            current = Status.BAD_FORMAT;
-        }
-        if (!denominatorSecond.get().isEmpty()
-                && Integer.parseInt(denominatorSecond.get()) == 0) {
-            current = Status.BAD_FORMAT;
-        }
-        if (!numeratorFirst.get().isEmpty()) {
-            Integer.parseInt(numeratorFirst.get());
-        }
+        try {
+            int divNullCheck = 1;
+            if (!denominatorFirst.get().isEmpty()
+                    && Integer.parseInt(denominatorFirst.get()) == 0) {
+                current = Status.BAD_FORMAT;
+            }
+            if (!denominatorSecond.get().isEmpty()
+                    && Integer.parseInt(denominatorSecond.get()) == 0) {
+                current = Status.BAD_FORMAT;
+            }
+            if (!numeratorFirst.get().isEmpty()) {
+                Integer.parseInt(numeratorFirst.get());
+            }
+            if (!numeratorSecond.get().isEmpty()) {
+                divNullCheck = Integer.parseInt(numeratorSecond.get());
+            }
+            if (divNullCheck == 0 && operation.get() == Operation.DIV) {
+                current = Status.BAD_FORMAT;
+            }
+        } catch (NumberFormatException nfe) {
+                current = Status.BAD_FORMAT;
+            }
         return current;
     }
 

@@ -10,7 +10,6 @@ import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class ViewModelTests {
 
@@ -133,16 +132,9 @@ public class ViewModelTests {
         assertEquals("1", viewModel.resultDenominatorProperty().get());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void canNotCreateViewModelWithNullLogger() {
-        try {
-            new ViewModel(null);
-            fail("no exception");
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Logger parameter can't be null", ex.getMessage());
-        } catch (Exception ex) {
-            fail("Invalid exception");
-        }
+        new ViewModel(null);
     }
 
     @Test
@@ -153,7 +145,7 @@ public class ViewModelTests {
     }
 
     @Test
-    public void logContainsCorrectMessage() {
+    public void logContainsCorrectMessageAfterCalculation() {
         setInputData("3", "4", "5", "6");
         viewModel.calculate();
         String message = viewModel.getLog().get(0);
@@ -162,20 +154,15 @@ public class ViewModelTests {
     }
 
     @Test
-    public void logContainsCorrectArguments() {
+    public void logContainsCorrectArgumentsAfterCalculation() {
         setInputData("1", "2", "3",  "4");
-
         viewModel.calculate();
-
         String message = viewModel.getLog().get(0);
-        assertTrue(message.matches(".*" + viewModel.numeratorFirstProperty().get()
-                + ".*" + viewModel.denominatorFirstProperty().get()
-                + ".*" + viewModel.numeratorSecondProperty().get()
-                + ".*" + viewModel.denominatorSecondProperty().get() + ".*"));
+        checkOutputData(message);
     }
 
     @Test
-    public void operationChangedInLogCorrectly() {
+    public void logContainsCorrectMessageAfterOperationChange() {
         setInputData("7", "8", "9", "9");
         viewModel.onOperationChanged(Operation.ADD, Operation.MULTIPLY);
         String text = viewModel.getLog().get(0);
@@ -194,7 +181,7 @@ public class ViewModelTests {
     }
 
     @Test
-    public void operationTypesAddedToTheLogCorrectly() {
+    public void logContainsCorrectOperationMessageAfterCalculation() {
         setInputData("3", "3", "4", "5");
         viewModel.calculate();
         String text = viewModel.getLog().get(0);
@@ -202,29 +189,73 @@ public class ViewModelTests {
     }
 
     @Test
-    public void argumentsCorrectFormatted() {
-        setInputData("1", "1", "1", "1");
-
+    public void logContainsCorrectEditFieldsMessage() {
+        setInputData("3", "3", "4", "5");
         viewModel.calculate();
-
-        String message = viewModel.getLog().get(0);
-        assertTrue(message.matches(".*Arguments"
-                + ": first ratio = " + viewModel.numeratorFirstProperty().get()
-                + "/" + viewModel.denominatorFirstProperty().get()
-                + "; second ratio = " + viewModel.numeratorSecondProperty().get()
-                + "/" + viewModel.denominatorSecondProperty().get() + ".*"));
+        setInputData("7", "7", "7", "7");
+        viewModel.calculate();
+        String message = viewModel.getLog().get(1);
+        checkOutputData(message);
     }
 
     @Test
-    public void doNotAddEqualPropertiesTwice() {
-        viewModel.denominatorSecondProperty().set("12");
-        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
-        viewModel.denominatorSecondProperty().set("12");
-        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
+    public void argumentsCorrectFormatted() {
+        setInputData("1", "1", "1", "1");
+        viewModel.calculate();
+        String message = viewModel.getLog().get(0);
+        assertTrue(message.matches(".* Arguments"
+                + ":first ratio = " + viewModel.numeratorFirstProperty().get()
+                + "/" + viewModel.denominatorFirstProperty().get()
+                + ";second ratio = " + viewModel.numeratorSecondProperty().get()
+                + "/" + viewModel.denominatorSecondProperty().get() + " .*"));
+    }
 
+    @Test
+    public void argumentsAreCorrectlyLogged() {
+        setInputData("1", "1", "1", "1");
+        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
+        String message = viewModel.getLog().get(0);
+        assertTrue(message.matches(".*" + LogMessages.EDITING_FINISHED
+                + "Input arguments:"
+                + viewModel.numeratorFirstProperty().get() + "/"
+                + viewModel.denominatorFirstProperty().get() + "; "
+                + viewModel.numeratorSecondProperty().get() + "/"
+                + viewModel.denominatorSecondProperty().get()));
+    }
+
+
+    @Test
+    public void logDoesNotContainMessageAfterFocusChangeWithNoEdit() {
+        viewModel.denominatorSecondProperty().set("12");
+        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
+        viewModel.denominatorSecondProperty().set("12");
+        viewModel.onFocusChanged(Boolean.TRUE, Boolean.FALSE);
         Assert.assertEquals(1, viewModel.getLog().size());
     }
 
+    @Test
+    public void operationIsNotLoggedIfOperationNotChanged() {
+        viewModel.onOperationChanged(Operation.ADD, Operation.MULTIPLY);
+        viewModel.onOperationChanged(Operation.MULTIPLY, Operation.MULTIPLY);
+        Assert.assertEquals(1, viewModel.getLog().size());
+    }
+
+    @Test
+    public void logContainCorrectNumMessages() {
+        setInputData("1", "1", "1", "1");
+        viewModel.calculate();
+        viewModel.calculate();
+        viewModel.calculate();
+
+        Assert.assertEquals(3, viewModel.getLog().size());
+    }
+
+    void checkOutputData(final String message) {
+        assertTrue(message.matches(".*" + viewModel.numeratorFirstProperty().get()
+                + ".*" + viewModel.denominatorFirstProperty().get()
+                + ".*" + viewModel.numeratorSecondProperty().get()
+                + ".*" + viewModel.denominatorSecondProperty().get() + ".*"));
+    }
 
     private void setInputData(final String denominatorFirst, final String numeratorFirst,
                               final String denominatorSecond, final String numeratorSecond) {

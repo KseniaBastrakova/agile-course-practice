@@ -13,7 +13,6 @@ import ru.unn.agile.RatioCalculator.Infrastructure.TxtLogger;
 public class Calculator {
     @FXML
     void initialize() {
-        viewModel.setLogger(new TxtLogger("./txt.log"));
         final ChangeListener<Boolean> changeListener = new ChangeListener<Boolean>() {
             @Override
             public void changed(final ObservableValue<? extends Boolean> observableValue,
@@ -22,27 +21,20 @@ public class Calculator {
             }
         };
 
-    numeratorFirst.textProperty().bindBidirectional(viewModel.numeratorFirstProperty());
-    numeratorFirst.focusedProperty().addListener(changeListener);
-    numeratorSecond.textProperty().bindBidirectional(viewModel.numeratorSecondProperty());
-    numeratorSecond.focusedProperty().addListener(changeListener);
-    denominatorFirst.textProperty().bindBidirectional(viewModel.denominatorFirstProperty());
-    denominatorFirst.focusedProperty().addListener(changeListener);
-    denominatorSecond.textProperty().bindBidirectional(viewModel.denominatorSecondProperty());
-    denominatorSecond.focusedProperty().addListener(changeListener);
+        viewModel.setLogger(new TxtLogger("./txt.log"));
+        numeratorFirst.textProperty().bindBidirectional(viewModel.numeratorFirstProperty());
+        numeratorFirst.focusedProperty().addListener(changeListener);
+        numeratorSecond.textProperty().bindBidirectional(viewModel.numeratorSecondProperty());
+        numeratorSecond.focusedProperty().addListener(changeListener);
+        denominatorFirst.textProperty().bindBidirectional(viewModel.denominatorFirstProperty());
+        denominatorFirst.focusedProperty().addListener(changeListener);
+        denominatorSecond.textProperty().bindBidirectional(viewModel.denominatorSecondProperty());
+        denominatorSecond.focusedProperty().addListener(changeListener);
+        cbOperation.valueProperty().bindBidirectional(viewModel.operationProperty());
 
-    cbOperation.valueProperty().bindBidirectional(viewModel.operationProperty());
-
-
-    cbOperation.valueProperty().addListener(new ChangeListener<Ratio.Operation>() {
-            @Override
-            public void changed(final ObservableValue<? extends Ratio.Operation> observable,
-                                final Ratio.Operation oldValue,
-                                final Ratio.Operation newValue) {
-                viewModel.onOperationChanged(oldValue, newValue);
-            }
-        });
-    calc.setOnAction(event -> viewModel.calculate());
+        cbOperation.valueProperty().addListener((observable, oldValue, newValue)
+                -> viewModel.onOperationChanged(oldValue, newValue));
+        calc.setOnAction(event -> viewModel.calculate());
     }
 
     @FXML

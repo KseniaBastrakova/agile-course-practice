@@ -1,6 +1,7 @@
 package ru.unn.agile.RatioCalculator.Infrastructure;
 
-import ru.unn.agile.RatioCalculator.viewmodel.*;
+import ru.unn.agile.RatioCalculator.viewmodel.ViewModelTests;
+import ru.unn.agile.RatioCalculator.viewmodel.ViewModel;
 
 public class ViewModelWithTxtLoggerTests extends ViewModelTests {
     @Override

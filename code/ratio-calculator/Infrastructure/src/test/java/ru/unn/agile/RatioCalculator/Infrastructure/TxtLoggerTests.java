@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertTrue;
 public class TxtLoggerTests {
     @Before
     public void setUp() {
-        testLogger = new TxtLogger(NAME_LOG);
+        testLogger = new TxtLogger(TEST_LOG_NAME);
     }
 
     @Test
@@ -36,9 +36,9 @@ public class TxtLoggerTests {
     @Test
     public void canCreateFile() {
         try {
-            new BufferedReader(new FileReader(NAME_LOG));
+            new BufferedReader(new FileReader(TEST_LOG_NAME));
         } catch (FileNotFoundException ex) {
-            fail("File " + NAME_LOG + " not found!");
+            fail("File " + TEST_LOG_NAME + " not found!");
         }
     }
 
@@ -65,6 +65,6 @@ public class TxtLoggerTests {
         }
     }
 
-    private static final String NAME_LOG = "./TestLog.log";
+    private static final String TEST_LOG_NAME = "./TestLog.log";
     private TxtLogger testLogger;
 }

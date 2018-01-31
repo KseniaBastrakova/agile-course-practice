@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Locale;
 
 public class TxtLogger implements ILogger {
-    public TxtLogger(final String nameFolder) {
+    public TxtLogger(final String folderName) {
 
         BufferedWriter currentLog = null;
-        this.nameFolder = nameFolder;
+        this.folderName = folderName;
         try {
-            currentLog = new BufferedWriter(new FileWriter(nameFolder));
+            currentLog = new BufferedWriter(new FileWriter(folderName));
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -31,7 +31,7 @@ public class TxtLogger implements ILogger {
         BufferedReader bufferedReader;
         ArrayList<String> currentLog = new ArrayList<>();
         try {
-            bufferedReader = new BufferedReader(new FileReader(nameFolder));
+            bufferedReader = new BufferedReader(new FileReader(folderName));
             String message = bufferedReader.readLine();
 
             while (message != null) {
@@ -59,11 +59,11 @@ public class TxtLogger implements ILogger {
 
     private static String now() {
         Calendar date = Calendar.getInstance();
-        SimpleDateFormat curreent = new SimpleDateFormat(YYYY_MM_DD_HH_MM_SS, Locale.ENGLISH);
+        SimpleDateFormat curreent = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
         return curreent.format(date.getTime());
     }
 
-    private static final String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final BufferedWriter writer;
-    private final String nameFolder;
+    private final String folderName;
 }
